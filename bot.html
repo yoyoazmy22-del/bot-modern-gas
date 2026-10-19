@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern Gas × AI — المساعد الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{--ink:#eaf5fc;--muted:#a9c2d4;--teal:#2dd4bf;--teald:#0e8f86;--flame:#fb923c;--flamed:#ea580c;--line:rgba(255,255,255,.13)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Cairo",system-ui,sans-serif;color:var(--ink);
+ background:radial-gradient(1100px 700px at 85% -5%,#114a6e 0%,transparent 55%),
+  radial-gradient(900px 700px at 5% 110%,#b4530966 0%,transparent 55%),
+  linear-gradient(165deg,#081c31,#0a2a46 55%,#0e3a55);
+ display:flex;flex-direction:column;align-items:center;height:100vh;overflow:hidden}
+.top{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;pointer-events:none}
+.brand-name{font-weight:900;letter-spacing:.14em;font-size:15px}
+.brand-chip{background:linear-gradient(135deg,var(--flame),var(--flamed));color:#0b1520;font-weight:900;font-size:12px;padding:3px 9px;border-radius:999px}
+.brand-sub-sm{font-size:12px;font-weight:700;color:var(--muted)}
+.clear{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.clear:hover{color:var(--ink);background:rgba(255,255,255,.12)}
+.api-url{width:170px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:11px;font-weight:600;padding:6px 10px;border-radius:999px;outline:none;transition:.2s;text-align:right;direction:ltr}
+.api-url:focus{border-color:rgba(45,212,191,.6);color:var(--ink);width:260px;background:rgba(255,255,255,.1)}
+.api-url::placeholder{color:#5a7a8e;font-weight:600;font-size:11px}
+.gk{width:150px;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.4);color:var(--muted);font-family:inherit;font-size:11px;font-weight:600;padding:6px 10px;border-radius:999px;outline:none;transition:.2s;direction:ltr}
+.gk:focus{border-color:var(--flame);color:var(--ink);width:230px;background:rgba(251,146,60,.13)}
+.gk::placeholder{color:#7d5a3a;font-weight:600;font-size:11px}
+.chat{width:min(780px,96vw);flex:1;display:flex;flex-direction:column;background:rgba(7,23,39,.55);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.chat-head{display:flex;align-items:center;gap:14px;padding:8px 14px;background:linear-gradient(135deg,#0baa8f,#08786c)}
+.chat-head strong{font-size:15px;line-height:1.2}
+.online{display:block;font-size:11px;color:#c8fdf3;font-weight:600}
+.voice-select{background:rgba(6,30,44,.6);border:1px solid rgba(255,255,255,.25);color:#d9fff8;font-family:inherit;font-size:12px;font-weight:600;padding:6px 8px;border-radius:9px;outline:none;cursor:pointer;max-width:170px}
+.voice-select:focus{border-color:#8ff5e6}
+.voice-select option{background:#0b3a4d;color:#f2fffc}
+.chat.speaking .online{animation:stt .6s ease infinite alternate}
+@keyframes stt{from{opacity:.55}to{opacity:1}}
+/* ═══ avatar: رجل AI ═══ */
+.ava-ai{width:94px;height:104px;flex:0 0 auto;position:relative;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.ava-ai svg{width:100%;height:100%;display:block}
+.ava-ai .glow{transform-box:fill-box;transform-origin:center}
+.chat.speaking .ava-ai .glow{animation:glowp 1s ease-in-out infinite}
+@keyframes glowp{0%,100%{opacity:.22;transform:scale(.96)}50%{opacity:.55;transform:scale(1.05)}}
+.ava-ai .headg{transform-box:fill-box;transform-origin:50% 42%}
+.chat.speaking .ava-ai .headg{animation:headbob .55s ease-in-out infinite}
+.chat.thinking .ava-ai .headg{animation:headtilt 1.1s ease-in-out infinite alternate}
+@keyframes headbob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(2.5px) rotate(1.6deg)}}
+@keyframes headtilt{from{transform:rotate(0deg)}to{transform:rotate(-4deg) translateY(1px)}}
+.ava-ai .eye{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+@keyframes blink{0%,92.5%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.wave{position:absolute;bottom:16px;right:-10px;display:flex;gap:2.5px;align-items:flex-end;height:16px;pointer-events:none}
+.wave i{width:3.5px;height:5px;background:#bdfbf0;border-radius:3px;opacity:.45}
+.chat.speaking .wave i{animation:wave .72s ease-in-out infinite}
+.chat.speaking .wave i:nth-child(1){animation-delay:0s}
+.chat.speaking .wave i:nth-child(2){animation-delay:.15s}
+.chat.speaking .wave i:nth-child(3){animation-delay:.3s}
+.chat.speaking .wave i:nth-child(4){animation-delay:.45s}
+@keyframes wave{0%,100%{height:4px;opacity:.4}50%{height:15px;opacity:1}}
+.ava-ai .ant{transform-box:fill-box;transform-origin:center}
+.chat.speaking .ava-ai .ant{animation:antp 1s ease-in-out infinite}
+@keyframes antp{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+.thinking-bub{position:absolute;top:-12px;left:-6px;background:#1c3c53;color:#9fc7de;font-weight:900;font-size:13px;border-radius:12px;padding:2px 10px;letter-spacing:2px;display:none;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+.chat.thinking .thinking-bub{display:block}
+.chat.thinking .thinking-bub span{animation:tp 1.2s infinite}
+.chat.thinking .thinking-bub span:nth-child(2){animation-delay:.15s}
+.chat.thinking .thinking-bub span:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{opacity:.35}30%{opacity:1}}
+.msg-area{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:20px 20px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.msg{max-width:78%;padding:11px 14px;border-radius:16px;font-size:14.5px;line-height:1.75;font-weight:600;white-space:pre-line;animation:pop .3s ease both}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.bot{align-self:flex-start;background:#1c3c53;color:#e9f6ff;border-start-start-radius:5px}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#0eab8f,#0a7f6a);color:#eafff9;border-start-end-radius:5px}
+.msg .line{padding:1px 0}
+.msg .h{font-weight:900;color:#8ff5e6}
+.bullet{display:flex;gap:8px;align-items:flex-start}
+.bullet::before{content:"◆";color:var(--flame);font-size:11px;margin-top:8px}
+.msg.alt .bullet::before{color:var(--teal)}
+.typing{display:flex;gap:4px;align-self:flex-start;padding:12px 15px;background:#1c3c53;border-radius:16px;border-start-start-radius:5px}
+.typing span{width:7px;height:7px;border-radius:50%;background:#9fc7de;animation:tp 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px 4px}
+.chip{background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.45);color:#bdfbf0;font-family:inherit;font-size:12.5px;font-weight:700;border-radius:999px;padding:7px 13px;cursor:pointer;transition:.2s}
+.chip:hover{background:rgba(45,212,191,.25)}
+.input-row{display:flex;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);background:rgba(9,32,50,.6)}
+.input-row input{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:15px;font-weight:600;padding:12px 16px;border-radius:999px;outline:none;transition:.2s}
+.input-row input:focus{border-color:rgba(45,212,191,.6);background:rgba(255,255,255,.1)}
+.input-row input::placeholder{color:#7d97aa;font-weight:600}
+.send{width:46px;height:46px;border-radius:50%;flex:0 0 auto;border:0;cursor:pointer;background:linear-gradient(135deg,var(--teal),var(--teald));color:#03201c;display:grid;place-items:center;transition:.2s}
+.send:hover{filter:brightness(1.1)}
+.send svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transform:scaleX(-1)}
+.note{padding:0 22px 16px;text-align:center;font-size:12px;color:var(--muted);font-weight:700}
+.note b{color:var(--teal)}
+.mic,.speak{width:46px;height:46px;border-radius:50%;flex:0 0 auto;border:1px solid var(--line);cursor:pointer;display:grid;place-items:center;transition:.25s;background:rgba(255,255,255,.06);color:#bfe8fb}
+.mic:hover,.speak:hover{background:rgba(255,255,255,.14);color:var(--ink)}
+.mic svg,.speak svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mic.on{background:linear-gradient(135deg,#f43f5e,#be123c);color:#fff;border-color:rgba(255,255,255,.35);animation:ripple 1.4s infinite}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(244,63,94,.55)}70%{box-shadow:0 0 0 14px rgba(244,63,94,0)}100%{box-shadow:0 0 0 0 rgba(244,63,94,0)}}
+.speak.on{background:linear-gradient(135deg,var(--teal),var(--teald));color:#03201c;border-color:transparent}
+.voice-pill{align-self:center;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);color:#cfe9f7;font-size:12.5px;font-weight:700;border-radius:999px;padding:7px 14px;animation:pop .25s ease both}
+.voice-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--flame);animation:tp 1s infinite}
+@media (max-width:520px){.msg{max-width:88%}.mic,.speak{width:40px;height:40px}.ava-ai{width:82px;height:92px}.chat-head{gap:10px}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <span class="brand-name">MODERN GAS</span><span class="brand-chip">× AI</span>
+      <span class="brand-sub-sm">المساعد الذكي — بيانات حقيقية من موقع الشركة</span>
+    </div>
+    <button class="clear" id="clearBtn">مسح المحادثة</button>
+    <input id="apiUrl" class="api-url" type="text" placeholder="رابط الـ API (.Colab)" title="ضع رابط ngrok API هنا" />
+    <input id="geminiKey" class="gk" type="password" placeholder="مفتاح Gemini AI (اختياري)" title="يُستخدم فقط لو فتحت الملف مباشرة بدون السيرفر" />
+  </div>
+  <div class="chat">
+    <div class="chat-head">
+      <div class="ava-ai" id="aiAvatar">
+        <svg viewBox="0 0 140 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="روبوت مودرن جاز الذكي">
+          <defs>
+            <linearGradient id="headG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f7fdff"/><stop offset=".55" stop-color="#ddeff5"/><stop offset="1" stop-color="#bcdde7"/>
+            </linearGradient>
+            <radialGradient id="glowG" cx=".5" cy=".5" r=".5">
+              <stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="torsoG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#0e6a77"/><stop offset="1" stop-color="#0a3a50"/>
+            </linearGradient>
+          </defs>
+          <circle class="glow" cx="70" cy="56" r="46" fill="url(#glowG)" opacity=".3"/>
+          <g class="headg">
+            <line x1="70" y1="26" x2="70" y2="9" stroke="#0e8f86" stroke-width="3" stroke-linecap="round"/>
+            <circle class="ant" cx="70" cy="7" r="4" fill="#2dd4bf"/>
+            <rect x="29" y="42" width="8" height="17" rx="4" fill="#0e8f86"/>
+            <rect x="103" y="42" width="8" height="17" rx="4" fill="#0e8f86"/>
+            <path d="M34 40 Q34 24 70 24 Q106 24 106 40 L106 74 Q106 92 70 92 Q34 92 34 74 Z" fill="url(#headG)" stroke="#0e8f86" stroke-width="2.5"/>
+            <ellipse cx="54" cy="36" rx="14" ry="6" fill="#ffffff" opacity=".55"/>
+            <path class="brow" d="M41 37 Q47 33 54 35" stroke="#0b3a4d" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path class="brow" d="M86 35 Q93 33 99 37" stroke="#0b3a4d" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <g class="eye"><circle cx="50" cy="47" r="7.4" fill="#fff" stroke="#0b3a4d" stroke-width="2.4"/><circle cx="51" cy="48" r="3.2" fill="#0b3a4d"/><circle cx="49" cy="46" r="1.1" fill="#fff"/></g>
+            <g class="eye"><circle cx="90" cy="47" r="7.4" fill="#fff" stroke="#0b3a4d" stroke-width="2.4"/><circle cx="91" cy="48" r="3.2" fill="#0b3a4d"/><circle cx="89" cy="46" r="1.1" fill="#fff"/></g>
+            <ellipse cx="41" cy="59" rx="4.5" ry="3" fill="#fb923c" opacity=".3"/>
+            <ellipse cx="99" cy="59" rx="4.5" ry="3" fill="#fb923c" opacity=".3"/>
+            <path id="mth" d="M60 64 Q70 69 80 64" stroke="#0b3a4d" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          </g>
+          <rect x="26" y="106" width="7" height="22" rx="3.5" fill="#0e8f86"/>
+          <rect x="107" y="106" width="7" height="22" rx="3.5" fill="#0e8f86"/>
+          <path d="M40 150 L47 102 Q49 94 70 94 Q91 94 93 102 L100 150 Z" fill="url(#torsoG)"/>
+          <rect x="55" y="107" width="30" height="20" rx="5" fill="#061f2c" stroke="#2dd4bf" stroke-width="1.6"/>
+          <text x="70" y="121" text-anchor="middle" font-size="8" font-weight="800" fill="#8ff5e6" font-family="Cairo">MG</text>
+          <rect x="48" y="146" width="13" height="4" rx="2" fill="#06202d"/>
+          <rect x="79" y="146" width="13" height="4" rx="2" fill="#06202d"/>
+        </svg>
+        <div class="thinking-bub"><span>.</span><span>.</span><span>.</span></div>
+        <div class="wave"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div>
+        <strong>Modern Gas · AI Assistant</strong>
+        <span class="online" id="statusLine">متصل الآن — رد فوري</span>
+      </div>
+      <select id="voiceSel" class="voice-select" title="اختر صوت البوت">
+        <option value="Charon">مصري رجالي — Shakir</option>
+        <option value="Aoede">مصرية ست — Salma</option>
+        <option value="Kore">مصرية ست — Salma (مطابقة)</option>
+        <option value="google">جوجل (آلي ومباشر — للأداء السريع)</option>
+      </select>
+    </div>
+    <div class="msg-area" id="msgArea"></div>
+    <div class="chips" id="chips"></div>
+    <div class="input-row">
+      <button class="mic" id="micBtn" aria-label="تكلم بصوت" title="تكلم بالصوت">
+        <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+      </button>
+      <input id="inp" type="text" placeholder="اسأل عن خدمات مودرن جاز: تعاقد، عداد، شحن، فواتير، سلامة..." autocomplete="off" />
+      <button class="speak on" id="speakBtn" aria-label="كتم الرد الصوتي" title="الرد الصوتي">
+        <svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button>
+      <button class="send" id="sendBtn" aria-label="إرسال">
+        <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="note"><b>مساعد شخصي لمودرن جاز</b> — ردوده على خدمات وإرشادات الشركة بس، من بيانات moderngas.com.eg الرسمية</div>
+<script>
+(() => {
+  "use strict";
+  /* ═══════════ أرقام خدمة العملاء لكل منطقة ═══════════
+     ضع هنا الأرقام من صور موقع الشركة (CSENO01-05):
+     القاهرة/القليوبية/الإسماعيلية / الشرقية / سوهاج/قنا / شمال وجنوب سيناء/مطروح */
+  /* مفتايح المناطق مكتوبة بالشكل المفروض (ا/ي/ه) عشان تطابق الاستعلام المطبّع */
+  const REGIONS = {
+    "القاهره": null, "القليوبيه": null, "الاسماعيليه": null,
+    "الشرقيه": null, "سوهاج": null, "قنا": null,
+    "شمال سينا": null, "جنوب سينا": null, "سينا": null, "مطروح": null,
+    "المنيا": null, "بني سويف": null, "اسيوط": null
+  };
+  const area = document.getElementById("msgArea");
+  const inp = document.getElementById("inp");
+  const sendBtn = document.getElementById("sendBtn");
+  const chipsEl = document.getElementById("chips");
+  const clearBtn = document.getElementById("clearBtn");
+  const micBtn = document.getElementById("micBtn");
+  const speakBtn = document.getElementById("speakBtn");
+  const voiceSel = document.getElementById("voiceSel");
+  const chatEl = document.querySelector(".chat");
+  const statusLine = document.getElementById("statusLine");
+  const mth = document.getElementById("mth");
+  const defOnline = "متصل الآن — رد فوري";
+  const apiUrlInput = document.getElementById("apiUrl");
+  const geminiInput = document.getElementById("geminiKey");
+  let API_URL = localStorage.getItem("mg_api_url") || "";
+  let GEMINI_KEY = localStorage.getItem("mg_gemini_key") || "";
+  let GEMINI_MODEL = "gemini-3.5-flash-lite";
+  apiUrlInput.value = API_URL;
+  geminiInput.value = GEMINI_KEY;
+  apiUrlInput.addEventListener("change", function () {
+    API_URL = this.value.replace(/\/+$/, "").trim();
+    localStorage.setItem("mg_api_url", API_URL);
+    status(API_URL ? "تم حفظ رابط الـ API: " + API_URL : "لم يُضبط رابط API — البوت يعمل بالمحرك المحلي");
+  });
+  geminiInput.addEventListener("change", function () {
+    GEMINI_KEY = this.value.trim();
+    localStorage.setItem("mg_gemini_key", GEMINI_KEY);
+    status(GEMINI_KEY ? "مفتاح Gemini اتسجل — البوت بيرد بالذكاء الاصطناعي" : "مفتاح Gemini اتمسح");
+  });
+  const SYSTEM_PROMPT = "أنت مساعد «مودرن جاز» الذكي — المساعد الشخصي للشركة الحديثة للغاز الطبيعي (moderngas.com.eg). أجب بالعامية المصرية بلطف واحترافية، وكن مختصراً (3-6 سطور). ردودك على خدمات الشركة وإرشاداتها فقط." +
+"\n\nعن الشركة: شركة مساهمة مصرية من قطاع البترول، تأسست في يوليو 2021 بدمج: غاز الأقاليم (2007) + القاهرة للغاز (2008) + سيناء للغاز (2009). رئيس مجلس الإدارة والعضو المنتدب: المهندس وائل جويد. النشاط: توصيل وتوزيع الغاز الطبيعي للمنازل والمحلات والمصانع، محطات تخفيض الضغط، محطات تموين السيارات بالغاز، توكيلات تجارية." +
+"\n\nمناطق التغطية: القاهرة، القليوبية، الإسماعيلية، الشرقية، سوهاج، قنا، شمال وجنوب سيناء، مرسى مطروح." +
+"\n\nالتعاقد: الطلب بالمستندات (إثبات شخصية + إثبات ملكية أو انتداب) من الفرع أو إدارة التعاقدات، ثم معاينة وتحديد التكلفة حسب النوع (سكني/تجاري/صناعي) والمنطقة، ثم تركيب الشبكة الداخلية والعداد وتسليم الإرشادات. التفاصيل في صفحة إجراءات التعاقد على الموقع الرسمي." +
+"\n\nالعداد (مسبق الدفع): الشحن على كارت الشحن من نقاط البيع أو إلكترونياً ثم يقرأ على العداد، والرصيد والاستهلاك ظاهرين على شاشة العداد أو البوابة الرسمية. رسالة E-01 معناها الكارت محتاج يثبت في الفتحة: ثبته 15 ثانية، لو رجعت جرب كمان مرة، لو استمرت اعمل زيارة فني." +
+"\n\nالدفع: فوري، فودافون كاش، InstaPay، البوابة الرسمية، والمبلغ يُسجل فوراً على العداد." +
+"\n\nالسلامة: تهوية جيدة وممنوع تخزين مواد مشتعلة جنب الأجهزة، راقب الشعلة وقت الطهي، سخان المياه يستهلك حوالي 15 متر مكعب في الشهر، أي فك أو تركيب لازم بجهات مرخصة." +
+"\n\nالطوارئ (ريحة غاز): اقفل محبس الغاز فوراً، افتح كل الشبابيك والأبواب، ممنوع تشغيل أي كهرباء أو لهب أو أعواد كبريت، اخرج واتصل برقم طوارئ الغاز 129. أمانك الأول." +
+"\n\nالتواصل: طوارئ الغاز 129، المقر الرئيسي/خدمة العملاء 0223494789، العنوان: قطعة 7-8 الحي الأول مركز خدمات الحي الأول مدينة بدر القاهرة. فرع بدر الجديد: عمارة 103 المجاورة الرابعة الحي الأول شارع سعد زغلول الدور الأرضي. المواعيد: السبت للخميس 8ص-4م والجمعة عطلة." +
+"\n\nتوضيح: مودرن جاز لا تبيع أسطوانات بوتاجاز أو أجهزة طهي — أسطوانات البوتاجاز مسؤولية جهات أخرى. حجز زيارة فني: يطلب رقم المشترك/العداد + المشكلة." +
+"\n\nقاعدة صارمة: أي سؤال خارج خدمات مودرن جاز (طقس، رياضة، أسئلة عامة...) أجبه باختصار: أنا مساعد شخصي لشركة مودرن جاز وردودي على خدمات الشركة وإرشاداتها فقط.";
+  async function geminiChat(msg) {
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + encodeURIComponent(GEMINI_KEY);
+    var body = {
+      systemInstruction: { role: "system", parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{ role: "user", parts: [{ text: msg }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 700, topP: 0.92 }
+    };
+    var resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      var err = await resp.json().catch(function () { return {}; });
+      throw new Error((err.error && err.error.message) || ("HTTP " + resp.status));
+    }
+    var data = await resp.json();
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+      throw new Error("استجابة فارغة من Gemini");
+    }
+    var txt = data.candidates[0].content.parts.map(function (p) { return p.text || ""; }).join("").trim();
+    if (data.candidates[0].finishReason && data.candidates[0].finishReason !== "STOP") {
+      txt += "\n(اكتمل الرد لطول الخانة)";
+    }
+    return txt;
+  }
+  function status(msg){ statusLine.innerHTML = msg; }
+  let CONV = [];
+  function pushConv(role, content) {
+    CONV.push({ role: role, content: (content || "").slice(0, 600) });
+    if (CONV.length > 16) CONV = CONV.slice(-16);
+  }
+  const N = s => (s || "").toLowerCase()
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي").replace(/ة/g, "ه")
+    .replace(/[^\u0600-\u06ff ]/g, " ").replace(/\s+/g, " ").trim();
+  const G = [
+    ["صباح الخير","مساء الخير","السلام عليكم","مرحبا","اهلا","هاي","سلام"],
+    ["عن الشركه","مين انت","انت مين","بتعملوا ايه","توصيل الغاز","توزيع الغاز","انشطه","محطات تخفيض","تموين السيارات","بانشن"],
+    ["مناطق","اطق الامتياز","بتوصلو فين","تغطيه","المحافظات","اشتغلوا فين"],
+    ["تعاقد","اتعاقد","توصيل لبيتي","توصيل شقه","وصل غاز","تركيب غاز","اشتراك","مشترك"],
+    ["عداد","كارت","شحن","رصيد","قرايه","مقفول","قفل","عداد ذكي","العداد"],
+    ["دفع","فاتوره","مستحقات","كم عليا","بوابه","فوري","فودافون","انستاباي","ايصال","شحن"],
+    ["سلامه","امان","نصايح","فحص","قواعد الامان"],
+    ["حريق","نار","طوارئ"],
+    ["تسريب","ريحه","غاز معفن"],
+    ["رقم","تليفون","تواصل","واتساب","الخط الساخن"],
+    ["عنوان","فرع","بدر","مقر","مكان"],
+    ["مواعيد","دوام","مفتوح","سعات"],
+    ["رؤيه","رساله","هدف","قيم"],
+    ["رئيس","وائل","المدير"],
+    ["شكرا","شكرن","تسلم","ميرسي"],
+    ["اسطوانه","بوتاجاز","بونين","فرن","سخان","طباخه","اجهزه"],
+  ];
+  const R = {
+    greeting: "أهلاً بيك في Modern Gas! أنا مساعد مودرن جاز الذكي — المساعد الشخصي للشركة الحديثة للغاز الطبيعي. ردودي جوه خدمات الشركة وإرشاداتها بس: التعاقد على الغاز، شحن وقراءة العداد، الفواتير، السلامة، وأرقام التواصل. اسألني في أي حاجة تخص مودرن جاز وأنا معاك.",
+    about: [
+      [{h:true,t:"Modern Gas هي «الشركة الحديثة للغاز الطبيعي»:"}],
+      [{t:"شركة مساهمة مصرية من شركات قطاع البترول، اتأسست في يوليو 2021 بدمج تلات شركات: غاز الأقاليم (ريجاز 2007) + القاهرة للغاز (2008) + سيناء للغاز (2009)."}],
+      [{t:"التخصص: توصيل وتوزيع الغاز الطبيعي للمنازل والمحلات والمصانع والمدن الجديدة، محطات تخفيض الضغط، محطات تموين السيارات بالغاز، وأعمال بنية أساسية وتوكيلات تجارية."}],
+      [{t:"رئيس مجلس الإدارة والعضو المنتدب: المهندس وائل جويد."}],
+      ["لو حابب تفاصيل الرسالة والرؤية أو إجراءات التعاقد، قوللي وأنا هوريك.",
+      ],
+    ],
+    activities: [
+      [{h:true,t:"نشاط مودرن جاز بيمشي على طول سلسلة الغاز الطبيعي:"}],
+      [{t:"توصيل الغاز الطبيعي: إنشاء وإدارة وتشغيل وصيانة شبكات وتركيبات ومحطات تخفيض الضغط."}],
+      [{t:"توزيع الغاز: إعداد الغاز وتوزيعه على المستهلكين — صناعي وتجاري ومنزلي."}],
+      [{t:"تداول الغاز: استلام الغاز من شركات النقل وتسليمه للمستهلكين، وإدارة محطات تموين السيارات بالغاز."}],
+      [{t:"الاستيراد والتوكيلات: عقود توكيلات تجارية مع الموردين وتسويق المعدات محلياً وبرة."}],
+    ],
+    coverage: [
+      [{h:true,t:"مناطق امتياز مودرن جاز في توصيل الغاز الطبيعي:"}],
+      [{t:"القاهرة والقليوبية والإسماعيلية."}],
+      [{t:"الشرقية (من ضمنها جولات المتابعة على محطات تخفيض الضغط)."}],
+      [{t:"سوهاج وقنا في الصعيد — ومستمرين في التوسع بمحافظات الصعيد."}],
+      [{t:"شمال وجنوب سيناء ومرسى مطروح."}],
+      [{t:"بنوصل الغاز الطبيعي كمان للمنازل والمحلات والمصانع في مناطق الامتياز دي."}],
+      ["لو منطقتك مش في القايمة، ابعتلي اسمها وأنا أتأكدلك من بياناتنا.",
+      ],
+    ],
+    contract: [
+      [{h:true,t:"التعاقد على توصيل الغاز الطبيعي بيتيَّم على خطوات ثابتة:"}],
+      [{t:"بتقدم طلب تعاقد بالمستندات المطلوبة (إثبات شخصية + إثبات ملكية أو انتداب) من الفرع أو إدارة التعاقدات."}],
+      [{t:"بيتحصل معاينة للموقع، وبتتحدد التكلفة حسب النوع (سكني / تجاري / صناعي) والمنطقة."}],
+      [{t:"فرق التنفيذ بتركب الشبكة الداخلية والعداد، وبعدها بتستلم وتاخد إرشادات الاستخدام الآمن."}],
+      ["التفاصيل الرسمية والمستندات موجودة في صفحة «إجراءات التعاقد على الغاز» على الموقع الرسمي moderngas.com.eg — لو عايز اعرفلك المتطلبات بالظبط ابعتلي منطقتك ونوع العقار.",
+      ],
+    ],
+    meters: [
+      [{h:true,t:"العدادات عندنا مسبقة الدفع — كل شغلة فيها شحن وقراءة:"}],
+      [{t:"شحن الرصيد: بتحطه على كارت الشحن من أي نقطة تصرف/بيع أو إلكترونياً، وبعدين يتقرا الكارت على العداد."}],
+      [{t:"قراءة الاستهلاك والرصيد: ظاهرة على شاشة العداد مباشرة، وممكن من حسابك على البوابة الرسمية."}],
+      [{t:"لو العداد كاتب رسالة خطأ أو مقفول — ابعتلي الرسالة اللي ظاهرة حرف بحرف وأنا أقولك خطوة بخطوة."}],
+      ["أشهرها رسالة E-01 (كارت محتاج يثبت في الفتحة) — قوليلي وحلّتلك فوراً.",
+      ],
+    ],
+    e01: [
+      [{h:true,t:"رسالة E-01 على عداد الغاز معناها إن كارت الشحن محتاج يثبت شوية في الفتحة:"}],
+      [{t:"ثبّت الكارت في Slot العداد لمدة 15 ثانية من غير ما تحرك."}],
+      [{t:"استنى واتفرج على الشاشة — هتكتب الرسالة أو الرصيد."}],
+      [{t:"لو عملت E-01 تاني، انزع الكارت وجربها مرة تانية."}],
+      ["لو العطل مستمر بعد المحاولتين، أنا جاهز أعمللك طلب زيارة فني — ابعتلي رقم المشترك وهيتم التجهيز تلقائياً.",
+      ],
+    ],
+    payment: [
+      [{h:true,t:"الدفع والشحن متاح من أكتر من طريقة:"}],
+      [{t:"بوابات الدفع الإلكتروني وشركات التحصيل المتاحة (زي فوري وفودافون كاش وInstaPay) لشحن كارت الغاز."}],
+      [{t:"المبلغ بيتسجل على العداد فوراً بعد الشحن."}],
+      [{t:"لو محتاج رقم الاشتراك أو قيمة المستحق — ابعتلي رقم العداد وأنا أساعدك."}],
+      ["اية أحسن طريقة ليك: من البيت ولا من نقطة بيع قريبة؟",
+      ],
+    ],
+    safety: [
+      [{h:true,t:"أهم إرشادات الأمان عندنا في الغاز الطبيعي:"}],
+      [{t:"التهوية: خلي الشبابيك مفتوحة في مكان الغاز، ومتخزنش مواد شديدة الاشتعال (بنزين/بويه) جنب الأجهزة."}],
+      [{t:"المتابعة: راقب الشعلة وقت الطهي — الفوران ممكن يطفّي الشعلة ويسيب غاز من غير ما تحس."}],
+      [{t:"سخان المياه: درجة حرارة مناسبة تكفي، وسيب الشعلة شغالة طول الليل بياكل حوالي 15 متر مكعب في الشهر (ما يعادل أنبوبة كاملة)."}],
+      [{t:"الفحص الدوري: أي تركيب أو فك أو تمديد لازم يتم عن طريق جهات مرخصة، والصيانة الدورية بتقلل الأعطال والخطورة."}],
+    ],
+    emergency: [
+      [{h:true,t:"حالة طوارئ غاز — اعمل بالترتيب ده فوراً:"}],
+      [{t:"ما تشغّلش ولا تطفّي أي مفاتيح كهربائية أو أجهزة منزلية."}],
+      [{t:"ممنوع نهائي أعواد كبريت أو أي لهب أو أي مصدر اشتعال."}],
+      [{t:"افتح أقرب نوافذ وأبواب عشان الغاز يخرج بسرعة."}],
+      [{t:"اقفل فوراً محبس الغاز الرئيسي اللي جنب العداد."}],
+      [{t:"اتصل برقم طوارئ الغاز 129 أو تواصل مع شرطة النجدة."}],
+      ["متسيبش المكان لحد ما الفريق يوصل ويتأكد إن كل حاجة سليمة.",
+      ],
+    ],
+    leak: [
+      [{h:true,t:"حسّيت بريحة غاز أو شكيت في تسريب؟ اعمل بالترتيب ده فوراً:"}],
+      [{t:"اقفل محبس الغاز الرئيسي جنب العداد."}],
+      [{t:"افتح كل الشبابيك والأبواب للتهوية."}],
+      [{t:"ممنوع تشغيل كهرباء أو لهب أو أي مصدر اشتعال."}],
+      [{t:"اخرج من المكان واتصل برقم طوارئ الغاز 129."}],
+      ["أمانك الأول — ومتسبش المكان لحد ما الفريق يوصل.",
+      ],
+    ],
+    book: [
+      [{h:true,t:"حجز زيارة فني سهل وسريع:"}],
+      [{t:"ابعتلي رقم المشترك/العداد + المشكلة اللي ظاهرة (رسالة عداد، عطل، شك في تسريب)."}],
+      [{t:"الفريق الفني بينزل في أقرب معاد متاح، والتأكيد بيوصلك بالتفاصيل."}],
+      ["ملحوظة: لو في ريحة غاز دلوقتي — اقفل المحبس وافتح الشبابيك وكلم 129 الأول قبل الفني.",
+      ],
+    ],
+    contact: [
+      [{h:true,t:"أرقامنا الرسمية من موقع الشركة:"}],
+      [{t:"طوارئ الغاز: 129 — لأي تسريب أو حالة خطرة."}],
+      [{t:"المقر الرئيسي / خدمة العملاء: 0223494789."}],
+      [{t:"العنوان: قطعة 7-8 الحي الأول، مركز خدمات الحي الأول، مدينة بدر، محافظة القاهرة."}],
+      [{t:"الموقع الرسمي: moderngas.com.eg — فيه صفحات إجراءات التعاقد وأرقام خدمة العملاء."}],
+      ["كل منطقة في مناطق الامتياز ليها خط خدمة عملاء متخصص — ابعتلي اسم منطقتك وهوجهلك الرقم.",
+      ],
+    ],
+    location: [
+      [{h:true,t:"المقر الرئيسي لمودرن جاز:"}],
+      [{t:"قطعة 7-8 الحي الأول، مركز خدمات الحي الأول، مدينة بدر، محافظة القاهرة."}],
+      [{h:true,t:"تنويه مهم لعملاء بدر:"}],
+      [{t:"فرع خدمة عملاء بدر اتنقل للموقع الجديد — (عمارة 103) المجاورة الرابعة، الحي الأول، شارع سعد زغلول، الدور الأرضي."}],
+      ["مواعيد العمل: السبت للخميس من 8 الصبح لـ 4 العصر، والجمعة عطلة.",
+      ],
+    ],
+    hours: [
+      [{h:true,t:"مواعيد العمل الرسمية:"}],
+      [{t:"السبت للخميس: من 8 الصبح لحد الساعة 4 العصر."}],
+      [{t:"الجمعة: عطلة."}],
+      [{t:"طوارئ الغاز (129): شغالة في كل الأوقات لحالات التسريب والخطورة."}],
+    ],
+    vision: [
+      [{h:true,t:"رؤية مودرن جاز في سطور:"}],
+      [{t:"الرؤية: إحداث نقلات نوعية في عمليات توصيل الغاز الطبيعي حسب المعايير القومية للجودة والاعتماد، والريادة بين شركات التوصيل."}],
+      [{t:"الرسالة: أهمية قصوى لرأس المال البشري، وتحسين بيئة العمل ورفع رضا العاملين."}],
+      [{t:"القيم: رضا العملاء، العمل الجماعي، التميز التشغيلي، الجودة، المسؤولية، والطموح."}],
+    ],
+    chairman: [
+      [{h:true,t:"رئيس مجلس الإدارة والعضو المنتدب في مودرن جاز:"}],
+      [{t:"المهندس وائل جويد."}],
+      [{t:"وهو اللي بيترأس وفود الشركة في مشروعات التوسع في توصيل الغاز الطبيعي بالمحافظات، وفي متابعة محطات تخفيض الضغط خلال الأعياد."}],
+    ],
+    cylinders: [
+      [{h:true,t:"توضيح مهم مني كممثل مودرن جاز:"}],
+      [{t:"مودرن جاز شركة توصيل وتوزيع الغاز الطبيعي — بنوصل الغاز الطبيعي للبيوت والشركات، ومش بنبيع أسطوانات بوتاجاز أو أجهزة طهي."}],
+      [{t:"أسطوانات البوتاجاز مسؤولة منها جهات تانية برة منظومة توصيل الغاز الطبيعي."}],
+      ["لو حابب توصيل غاز طبيعي لبيتك أو محلك، أنا معاك في التعاقد والخطوات.",
+      ],
+    ],
+    thanks: "العفو! سعدت بخدمتك. لو في أي حاجة تخص مودرن جاز — تعاقد، عداد، شحن، فواتير، سلامة، أو أرقام تواصل — أنا معاك في أي وقت.",
+    fallback: [
+      [{h:true,t:"أنا مساعد «مودرن جاز» الشخصي."}],
+      [{t:"كلامي وردودي جوه خدمات الشركة وإرشاداتها بس: تعاقد على الغاز الطبيعي، العداد والشحن والقراءة، الفواتير، السلامة، وأرقام التواصل."}],
+      ["أي سؤال برة اللي يخص مودرن جاز مش هقدر أرد عليه — بس لو سؤالك عن الغاز الطبيعي أو من خدماتنا، أعيد صياغته وأنا في خدمتك.",
+      ],
+    ],
+  };
+  const GKEYS = ["greeting","about","coverage","contract","meters","payment","safety","emergency","leak","contact","location","hours","vision","chairman","thanks","cylinders"];
+  const PHRASES = [
+    ["emergency", ["حريق","نار","لهب","طوارئ"]],
+    ["leak", ["تسريب","ريحه","غاز معفن"]],
+    ["e01", ["e-01","e01"]],
+    ["book", ["زياره فني","استدعي فني","حجز فني","فني العداد","احجز فني"]],
+    ["cylinders", ["بوتاجاز","بونين","اسطوانه"]],
+    ["contract", ["انتداب","تعاقد","اشتراك غاز"]],
+    ["hours", ["مواعيد","دوام"]],
+    ["location", ["عنوان","فرع","بدر"]],
+    ["contact", ["الرقم","تليفون","واتساب","الخط الساخن"]],
+    ["chairman", ["وائل جويد","رئيس الشركه"]],
+    ["vision", ["الرساله","الرؤيه","رساله"]],
+    ["safety", ["سلامه","نصايح","قواعد الامان"]],
+  ];
+  function unal(s) {
+    return s.split(" ").map(function (t) {
+      return (t.length > 2 && t.indexOf("ال") === 0) ? t.slice(2) : t;
+    }).join(" ");
+  }
+  function detect(q, raw) {
+    var q2 = unal(q);
+    for (var i = 0; i < PHRASES.length; i++) {
+      var p = PHRASES[i];
+      if (p[0] === "e01" && /e-?01/i.test(raw)) return "e01";
+      for (var j = 0; j < p[1].length; j++) {
+        var al = p[1][j];
+        if (q.indexOf(al) !== -1 || q2.indexOf(al) !== -1) return p[0];
+      }
+    }
+    var best = null, cn = null, bestScore = 0, bestPos = 1e9;
+    for (var g = 0; g < G.length; g++) {
+      var words = G[g], m = 0, pos = 1e9;
+      for (var w = 0; w < words.length; w++) {
+        var kw = words[w];
+        var k = q.indexOf(kw);
+        if (k === -1) k = q2.indexOf(kw);
+        if (k !== -1) { m++; if (k < pos) pos = k; }
+      }
+      var name = GKEYS[g];
+      if (m > bestScore || (m === bestScore && m > 0 && pos < bestPos)) {
+        best = name; bestScore = m; bestPos = pos;
+      }
+    }
+    if (bestScore > 0) return best;
+    /* منطقة من مناطق الامتياز؟ */
+    var qN = q.replace(/\s/g, "");
+    for (var rg in REGIONS) {
+      if (REGIONS.hasOwnProperty(rg) && qN.indexOf(rg) !== -1) return "coverage";
+    }
+    return "fallback";
+  }
+  const chipSet = ["عن مودرن جاز","تعاقد على الغاز","رسالة E-01","شحن كارت العداد","الفواتير والدفع","ريحة غاز / طوارئ","أرقام التواصل","العنوان والمواعيد"];
+  /* ═══════ رجل الـ AI: الكلام بالحركة ═══════ */
+  const MOUTH = {
+    idle: {d: "M60 64 Q70 69 80 64"},
+    t1:   {d: "M60 63 Q70 59 80 64 Q70 72 60 63 Z", f: "#08404f"},
+    t2:   {d: "M59 62 Q70 57 81 63 Q70 74 59 62 Z", f: "#08404f"}
+  };
+  let lipsTimer = null;
+  function setMouth(shape){
+    mth.setAttribute("d", shape.d);
+    if (shape.f) { mth.setAttribute("fill", shape.f); mth.setAttribute("stroke", "none"); }
+    else { mth.setAttribute("fill", "none"); mth.setAttribute("stroke", "#b06a4a"); }
+  }
+  function startLips(){
+    stopLips();
+    setMouth(MOUTH.t1);
+    lipsTimer = setInterval(function () {
+      var s = Math.random() > 0.5 ? MOUTH.t2 : MOUTH.t1;
+      setMouth(s);
+    }, 105);
+  }
+  function stopLips(){
+    if (lipsTimer) { clearInterval(lipsTimer); lipsTimer = null; }
+    setMouth(MOUTH.idle);
+  }
+  function setThinking(on){
+    chatEl.classList.toggle("thinking", on);
+    setMouth(MOUTH.idle);
+    if (on) status("بيفكر ويدور على الإجابة...");
+    else status(defOnline);
+  }
+  function scrollBottom() { area.scrollTop = area.scrollHeight; }
+  function userBubble(text) {
+    var d = document.createElement("div");
+    d.className = "msg user";
+    d.textContent = text;
+    area.appendChild(d);
+    scrollBottom();
+  }
+  function botBubble(content) {
+    var d = document.createElement("div");
+    d.className = "msg bot";
+    var lines = typeof content === "string" ? [content] : content;
+    for (var i = 0; i < lines.length; i++) {
+      var item = lines[i];
+      if (typeof item === "string") {
+        var ln = document.createElement("div");
+        ln.className = "line";
+        ln.textContent = item;
+        d.appendChild(ln);
+      } else {
+        for (var k = 0; k < item.length; k++) {
+          var o = item[k];
+          if (o.h) {
+            var hl = document.createElement("div");
+            hl.className = "line h";
+            hl.textContent = o.t;
+            d.appendChild(hl);
+          } else {
+            var bl = document.createElement("div");
+            bl.className = "bullet";
+            var sp = document.createElement("span");
+            sp.textContent = o.t;
+            bl.appendChild(sp);
+            d.appendChild(bl);
+          }
+        }
+      }
+    }
+    area.appendChild(d);
+    scrollBottom();
+  }
+  /* فقاعة الرد بتتحدث أثناء استقبال الكلام (ستريمينج) */
+  function streamBubble() {
+    var d = document.createElement("div");
+    d.className = "msg bot";
+    d.style.whiteSpace = "pre-wrap";
+    d.style.wordBreak = "break-word";
+    area.appendChild(d);
+    scrollBottom();
+    return {
+      update: function (txt) {
+        d.textContent = txt;
+        scrollBottom();
+      },
+      finalize: function (txt) { d.textContent = txt; scrollBottom(); },
+      el: d
+    };
+  }
+  function typing(cb) {
+    var t = document.createElement("div");
+    t.className = "typing";
+    for (var i = 0; i < 3; i++) { var s = document.createElement("span"); t.appendChild(s); }
+    area.appendChild(t);
+    scrollBottom();
+    setThinking(true);
+    setTimeout(function () { t.remove(); setThinking(false); cb(); }, 700 + Math.random() * 500);
+  }
+  function showThinking() {
+    var t = document.createElement("div");
+    t.className = "typing";
+    for (var i = 0; i < 3; i++) { var s = document.createElement("span"); t.appendChild(s); }
+    area.appendChild(t);
+    scrollBottom();
+    setThinking(true);
+    return t;
+  }
+  function hideThinking(el) {
+    if (el && el.parentNode) el.remove();
+    setThinking(false);
+  }
+  function renderChips() {
+    chipsEl.innerHTML = "";
+    for (var i = 0; i < chipSet.length; i++) {
+      (function (txt) {
+        var c = document.createElement("button");
+        c.className = "chip";
+        c.textContent = txt;
+        c.addEventListener("click", function () { handle(txt); });
+        chipsEl.appendChild(c);
+      })(chipSet[i]);
+    }
+  }
+  async function handle(text) {
+    var raw = (text || "").trim();
+    if (!raw) return;
+    stopVoice();
+    userBubble(raw);
+    inp.value = "";
+    pushConv("user", raw);
+    /* 1) السيرفر المحلي (المفتاح مخفي — الأفضل) */
+    if (window.location.protocol !== "file:") {
+      status("بيرد دلوقتي...");
+      var tt = showThinking();
+      try {
+        var resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: raw, history: CONV.slice(-10) })
+        });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        hideThinking(tt);
+        var sb = streamBubble();
+        var reader = resp.body.getReader();
+        var dec = new TextDecoder();
+        var full = "";
+        var fedUpTo = 0;
+        for (;;) {
+          var r = await reader.read();
+          if (r.done) break;
+          /* مهم: نضيفraw ونتجنّب trim جوّه اللوب — الـtrim بيبتلع المسافة
+             في آخر chunk فتلزق الكلمات ببعض. الـtrim للعرض بس. */
+          var delta = dec.decode(r.value, { stream: true });
+          full += delta;
+          sb.update(full.trim());
+          /* ابدأ الصوت مع أول جملة تكتمل أثناء البث — جزء الجديد بس */
+          if (voiceOn && full.length > fedUpTo) {
+            ttsFeed(full.slice(fedUpTo));
+            fedUpTo = full.length;
+          }
+        }
+        dec.decode();
+        full = full.trim();
+        if (!full.trim()) full = "عذراً، حدث خطأ. حاول مرة أخرى.";
+        sb.finalize(full);
+        pushConv("assistant", full);
+        renderChips();
+        ttsFinish(full);
+        return;
+      } catch (e) {
+        console.error("server error:", e);
+        hideThinking(tt);
+        status("السيرفر مش شغال — بتجربة المحرك المحلي...");
+      }
+    }
+    /* 2) Gemini مباشر (لو فاتح الملف الكاملة بدون سيرفر) */
+    if (GEMINI_KEY) {
+      status("الذكاء الاصطناعي بيجيب الرد...");
+      var tt2 = showThinking();
+      try {
+        var reply2 = await geminiChat(raw);
+        hideThinking(tt2);
+        pushConv("assistant", reply2);
+        botBubble(reply2);
+        renderChips();
+        if (voiceOn) speak(reply2);
+        return;
+      } catch (e) {
+        console.error("Gemini error:", e);
+        hideThinking(tt2);
+        status("Gemini مش شغال حالياً (" + e.message + ") — محاولة المحرك المحلي...");
+      }
+    }
+    /* 3) كولاب (لو فيه حقل الرابط) */
+    if (API_URL) {
+      status("الرجاء الانتظار... جاري الاستجابة من الـ AI...");
+      var tt3 = showThinking();
+      try {
+        var resp2 = await fetch(API_URL + "/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: raw, history: CONV.slice(-10) })
+        });
+        var data2 = await resp2.json();
+        var reply3 = data2.reply || "عذراً، حدث خطأ. حاول مرة أخرى.";
+        hideThinking(tt3);
+        pushConv("assistant", reply3);
+        botBubble(reply3);
+        renderChips();
+        if (voiceOn) speak(reply3);
+        return;
+      } catch (e) {
+        console.error("API error:", e);
+        hideThinking(tt3);
+        status("الـ API مش شغال — جاري الرد بالمحرك المحلي...");
+      }
+    }
+    /* 4) المحرك المحلي */
+    typing(function () {
+      var key = detect(N(raw), raw);
+      var content = R[key] ? R[key] : R.fallback;
+      var flat = flatten(content);
+      pushConv("assistant", flat);
+      botBubble(content);
+      renderChips();
+      if (voiceOn) speak(flat);
+    });
+  }
+  /* ═══════ الصوت: النطق (البوت بيرد بصوت) ═══════ */
+  var voiceOn = true;
+  var speaking = false;
+  var audioEl = null;
+  var arabicVoices = [];
+  function loadVoices() {
+    var vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    arabicVoices = vs.filter(function (v) { return v.lang && v.lang.indexOf("ar") === 0; });
+  }
+  if ("speechSynthesis" in window) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+  function pickVoice() {
+    if (!arabicVoices.length) return null;
+    for (var i = 0; i < arabicVoices.length; i++) {
+      var v = arabicVoices[i];
+      if (v.lang && v.lang.indexOf("ar-eg") !== -1) return v;
+    }
+    for (var j = 0; j < arabicVoices.length; j++) {
+      if (arabicVoices[j].localService === true) return arabicVoices[j];
+    }
+    return arabicVoices[0];
+  }
+  function flatten(content) {
+    var parts = [];
+    if (typeof content === "string") { parts.push(content); }
+    else {
+      for (var i = 0; i < content.length; i++) {
+        var item = content[i];
+        if (typeof item === "string") { parts.push(item); }
+        else { for (var k = 0; k < item.length; k++) { parts.push(item[k].t); } }
+      }
+    }
+    return parts.join("، ");
+  }
+  function setSpeaking(on) {
+    speaking = on;
+    chatEl.classList.toggle("speaking", on);
+    if (on) { status("بيرد عليك دلوقتي بصوت..."); startLips(); }
+    else { status(defOnline); stopLips(); }
+  }
+  /* تنظيف النص قبل الكلام — عشان الكلام ميبقاش غريب */
+  function cleanForTTS(t) {
+    return (t || "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[*#•·◆▪►>|]/g, " ")
+      .replace(/(^|\n)\s*[0-9\u0660-\u0669]+[.)\-]\s*/g, "$1")
+      .replace(/Modern Gas|Moderngas|modern gas|m\.g\./gi, "مودرن جاز")
+      .replace(/moderngas\.com\.eg/gi, "مودرن جاز دوت كم")
+      .replace(/instagram|instapay/gi, "انستاباي")
+      .replace(/fawry/gi, "فوري")
+      .replace(/\bEGP\b|\bE\.?\s?G\.?\s?P\.?\b/gi, "جنيه")
+      .replace(/\bSlot\b/gi, "الفتحة")
+      .replace(/\bVIP\b/gi, "في آي بي")
+      .replace(/\bE\s?-?\s?0?1\b/gi, "إي صفر واحد")
+      .replace(/\bE\s?-?\s?(\d{2})\b/gi, "إي $1")
+      .replace(/[\r\n]+/g, ". ")
+      .replace(/\(\s*\)/g, " ")
+      .replace(/\s+([.،!؟])/g, "$1")
+      .replace(/\bأيوة\b/gi, "أيوه")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+  /* تقسيم النص قطع ≤190 حرف عند حدود الجمل — أقل قطع = كلام أسلس */
+  function ttsChunks(text, max) {
+    max = max || 190;
+    var clean = cleanForTTS(text);
+    if (clean.length <= max) return [clean];
+    var out = [], cur = "", parts = clean.split(/(?<=[.!؟?])\s+/);
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if ((cur + " " + p).trim().length <= max) { cur = (cur + " " + p).trim(); }
+      else {
+        if (cur) out.push(cur);
+        cur = p;
+        while (cur.length > max) {
+          var cut = cur.lastIndexOf(" ", max);
+          if (cut < max * 0.5) cut = max;
+          out.push(cur.slice(0, cut).trim());
+          cur = cur.slice(cut).trim();
+        }
+      }
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  /* ── بث الصوت أثناء كتابة الرد ──
+     المشكلة القديمة: كان الصوت بيتنادى بعد ما الرد يخلص كله، فالمستخدم
+     بيستنى سكون طويل. دلوقتي: أول ما جملة تخلص نولّدها ونشغّلها فورًا،
+     واللي بعدها بيتحضّر بيتحضّر في الوقت نفسه (متوازي).
+     الهدف: أول كلام يطلع في أقل من ثانية من أول جملة. */
+  var ttsGen = 0, ttsVoice = "Charon", ttsPending = "", ttsStarted = false;
+  var ttsFirstDone = false;
+  var ttsPre = 0;   /* طلبات اتبعتت eagerly */
+  var synthChain = Promise.resolve();   /* التوليد: ورا بعض (worker واحد) */
+  var playQueue = [];                   /* التشغيل: ورا بعض (صوت واحد) */
+  var playBusy = false;
+  var ttsPendingBlobs = 0;
+  var ttsPlaySeq = 0;                   /* تسلسل القطع وقت الإرسال */
+  var ttsPlayNext = 0;                  /* القطعة اللي جاي نوبتها التشغيل */
+  function stopVoice() {
+    audioEl && audioEl.pause();
+    audioEl = null;
+    ttsGen = (ttsGen || 0) + 1;
+    ttsPending = "";
+    ttsStarted = false;
+    ttsFirstDone = false;
+    ttsPre = 0;
+    playQueue.length = 0;
+    if (ttsGenWait) ttsGenWait.length = 0;
+    playBusy = false;
+    ttsPendingBlobs = 0;
+    ttsPlaySeq = 0;
+    ttsPlayNext = 0;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (speaking) setSpeaking(false);
+  }
+  /* ابدأ جلسة صوت جديدة — بيستدعي stopVoice بعدين بيشيل أي اللي قبله */
+  function ttsBegin() {
+    stopVoice();
+    ttsVoice = (voiceSel && voiceSel.value) || "Charon";
+  }
+  /* كل ما النص يزيد أثناء البث: ابعت أول جملة بمجرد ما تخلص.
+     مهم: بناخد الجزء الجديد بس (delta) مش النص المجمّع كله، وإلا
+     النص هيتكرر في كل chunk وكل مرة الصوت هيعيد من الأول.
+     الأهم للسرعة: الجملة الأولى بس بتتولّد فوراً. باقي الجمل بنجمعها
+     في مقطع واحد واحد — لأن كل نداء لـEdge عليه ~2.2ث تكلفة ثابتة،
+     فرد بـ6 جمل = 17ث، ومقطعين = ~6ث. */
+  function ttsFeed(partial) {
+    if (!voiceOn || !partial) return;
+    if (!ttsStarted) { ttsBegin(); ttsStarted = true; }
+    ttsPending += partial;
+    /* أول جملة بس: أسرع بداية ممكنة */
+    if (!ttsFirstDone) {
+      var m = ttsPending.match(/^([\s\S]{2,160}?[.!؟?])\s+/);
+      if (!m) return;
+      ttsFirstDone = true;
+      var first = m[1].trim();
+      ttsPending = ttsPending.slice(m[0].length);
+      ttsSay(first);
+    }
+    /* أثناء البث: طلّع قطع صغيرة ورا بعض — متستنيش الرد يخلص */
+    ttsDrain();
+    if (ttsPending.length > 700) ttsPending = ttsPending.slice(0, 700);
+  }
+  /* اطرد اللي اتجمع أثناء البث كقطع ~95 حرف عشان الصوت ميفضلش واقف بعد
+     أول جملة لحد ما الرد كله يخلص — القطع بتتّشغّل بالترتيب فالمنطق سليم */
+  function ttsDrain() {
+    if (!ttsFirstDone) return;
+    while (ttsPending.length >= 60) {
+      var piece = ttsSplit(ttsPending, 95)[0];
+      if (!piece) break;
+      var idx = ttsPending.indexOf(piece);
+      ttsPending = ttsPending.slice(idx + piece.length).replace(/^\s+/, "");
+      if (piece.length >= 8) ttsSay(piece);
+    }
+  }
+  /* آخر حاجة: الباقي كله — قطّعه لقطع ~95 حرف وولّدها متوازية */
+  function ttsFinish() {
+    if (!voiceOn) { stopVoice(); return; }
+    if (!ttsStarted) { ttsBegin(); ttsStarted = true; }
+    var rest = ttsPending.trim();
+    ttsPending = "";
+    if (rest.length > 700) rest = rest.slice(0, 700);
+    if (rest.length <= 2) return;
+    if (ttsFirstDone) {
+      var parts = ttsSplit(rest, 95);
+      for (var j = 0; j < parts.length; j++) ttsSay(parts[j]);
+      return;
+    }
+    /* مفيش جملة أولى اتبعتت — نแผนه كامل */
+    var parts = ttsSpeakPlan(rest);
+    for (var i = 0; i < parts.length; i++) ttsSay(parts[i]);
+  }
+  function speak(text) {
+    /* رد كامل جاهز (Gemini محلي / مواضع تانية) */
+    if (!voiceOn || !text) return;
+    ttsBegin();
+    ttsStarted = true;
+    ttsPending = "";
+    var clean = cleanForTTS(text).slice(0, 700);
+    if (!clean) return;
+    var parts = ttsSpeakPlan(clean);
+    for (var i = 0; i < parts.length; i++) ttsSay(parts[i]);
+  }
+  /* تقسيم المقطع الواحد لـ3 نصوص متوازية.
+     قياس حقيقي على Edge (same content, نفس المدى الزمني):
+       مقطع واحد 245 حرف          = 11.5ث
+       3 مقاطع × ~90 حرف متوازية  = 6.4ث  ← أفضل نقطة
+       6 مقاطع × 52 حرف متوازية   = 19.2ث (الخنق بيبدأ)
+       3 مقاطع × 90 ورا بعض        = 11.8ث
+     يعني: أكثر من 3 مقاطع بيهبط الأداء، ورا بعض أبطأ من المتوازي. */
+  function ttsSpeakPlan(text) {
+    var first = text.match(/^([\s\S]{2,160}?[.!؟?])\s+/);
+    if (!first) return ttsSplit(text, 95);
+    var head = first[1].trim();
+    var rest = text.slice(first[0].length).trim();
+    if (!rest) return [head];
+    var out = [head];
+    out = out.concat(ttsSplit(rest, 95));
+    return out;
+  }
+  /* اقرا النص كله: تقطيعه لقطع ≤ الحد عند حدود الكلمات (بدل قصّ نص
+     ثابت). الـpool عند السيرفر بيلزّم 3 توليدات في نفس الوقت فمفيش خنق.
+     القطع بتتّشغل بالترتيب عبر ttsPlaySeq في ttsPumpPlay. */
+  function ttsSplit(text, maxLen) {
+    var out = [];
+    var words = text.split(/\s+/);
+    var cur = "";
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (!w) continue;
+      if (cur && (cur + " " + w).length > maxLen) {
+        out.push(cur);
+        cur = w;
+      } else {
+        cur = cur ? cur + " " + w : w;
+      }
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  /* ── طابور الصوت: توليد وشغّل منفصلين ──
+     التوليد (Edge) بياخد 2–4ث لكل جملة، والتشغيل بياخد وقت الصوت نفسه.
+     لو عملنا التوليد والتشغيل ورا بعض: المستخدم بيستنى 4ث ثم يسمع.
+     لو خلّينا التوليد جاري أثناء تشغيل الجملة السابقة: أول كلام فورًا
+     واللي بعده جاهز — بس لازم التشغيل نفسه يبقى ورا بعض (وإلا الصوت
+     اتداخل). فبنعمل: طابور توليد + طابور تشغيل، كل واحد ورا بعض. */
+  /* بوابة التوليد: أقصى 2 توليدات شغالة في نفس الوقت — لو الرد جه سريع
+     ومعد قطعه كلها مرة واحدة، التوليد بيتنقّط هنا بدل ما يتحمّل الـpool
+     دفعة واحدة، فكل قطعة تبقى جاهزة قبل ما اللي قبلها تخلص → كلام
+     متواصل من غير وقفات. */
+  var TTS_MAX_GEN = 2;
+  var ttsGenBusy = 0;
+  var ttsGenWait = [];
+  function ttsSay(chunk) {
+    var clean = cleanForTTS(chunk).trim();
+    if (!clean) return;
+    var seq = ttsPlaySeq++;
+    if (window.location.protocol === "file:") { playQueue.push({ seq: seq, text: clean }); ttsPumpPlay(); return; }
+    if (ttsGenBusy >= TTS_MAX_GEN) { ttsGenWait.push({ seq: seq, text: clean }); return; }
+    ttsGenSend(seq, clean);
+  }
+  function ttsGenSend(seq, clean) {
+    ttsGenBusy++;
+    var myGen = ttsGen;
+    var release = function () {
+      ttsGenBusy--;
+      if (myGen !== ttsGen) { ttsGenWait.length = 0; return; }
+      if (ttsGenWait.length) {
+        var nx = ttsGenWait.shift();
+        ttsGenSend(nx.seq, nx.text);
+      }
+    };
+    fetch("/api/speak?text=" + encodeURIComponent(clean) + "&voice=" + encodeURIComponent(ttsVoice))
+      .then(function (r) { if (!r.ok) throw new Error("tts"); return r.blob(); })
+      .then(function (b) {
+        if (myGen !== ttsGen) { release(); return; }
+        ttsPendingBlobs++;
+        release();
+        playQueue.push({ seq: seq, blob: b, text: clean });
+        ttsPumpPlay();
+      })
+      .catch(function () {
+        if (myGen !== ttsGen) { release(); return; }
+        release();
+        playQueue.push({ seq: seq, text: clean });   /* Arc/Google fallback if Edge fails */
+        ttsPumpPlay();
+      });
+  }
+  function ttsPumpPlay() {
+    if (playBusy || !playQueue.length) { if (!playQueue.length) setSpeaking(false); return; }
+    /* شغّل القطعة اللي تسلسلها هو اللي جاي بالترتيب — مش أول واحدة
+       وصلت، لأن القطع بتتولّد متوازية وواحدة ممكن توصل قبل اللي قبلها. */
+    var item = null;
+    for (var i = 0; i < playQueue.length; i++) {
+      if (playQueue[i].seq === ttsPlayNext) { item = playQueue[i]; playQueue.splice(i, 1); break; }
+    }
+    if (!item) return;   /* القطعة الجاية لسه بتتولّد — استنى */
+    playBusy = true;
+    var myGen = ttsGen;
+    var done = function () {
+      playBusy = false;
+      if (myGen !== ttsGen) { playQueue.length = 0; ttsPlayNext = 0; playBusy = false; setSpeaking(false); return; }
+      ttsPlayNext++;
+      ttsPumpPlay();
+    };
+    if (!item.blob) { fallbackSpeak(item.text, done); return; }
+    var url = URL.createObjectURL(item.blob);
+    var a = new Audio(url);
+    audioEl = a;
+    a.onplay = function () { setSpeaking(true); };
+    a.onended = function () { URL.revokeObjectURL(url); done(); };
+    a.onerror = function () { URL.revokeObjectURL(url); done(); };
+    a.play().catch(function () { URL.revokeObjectURL(url); fallbackSpeak(item.text, done); });
+  }
+  function fallbackSpeak(text, done) {
+    if (!("speechSynthesis" in window)) { if (done) done(); return; }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(cleanForTTS(text));
+    u.lang = "ar-EG";
+    u.rate = 0.96;
+    u.pitch = 1;
+    var v = pickVoice();
+    if (v) u.voice = v;
+    var started = false;
+    var guard = setTimeout(function () {
+      if (!started) { if (done) done(); }
+    }, 3000);
+    u.onstart = function () { started = true; setSpeaking(true); };
+    u.onend = function () { clearTimeout(guard); setSpeaking(false); if (done) done(); };
+    u.onerror = function () { clearTimeout(guard); setSpeaking(false); if (done) done(); };
+    speechSynthesis.speak(u);
+  }
+  /* ═══════ الصوت: الاستقبال (مايك) ═══════ */
+  function sr() { return window.SpeechRecognition || window.webkitSpeechRecognition; }
+  var rec = null;
+  var listening = false;
+  var pill = null;
+  function pillShow(text) {
+    if (pill) pill.remove();
+    pill = document.createElement("div");
+    pill.className = "voice-pill";
+    var d = document.createElement("span");
+    d.className = "dot";
+    var t = document.createElement("span");
+    t.textContent = text;
+    pill.appendChild(d);
+    pill.appendChild(t);
+    area.appendChild(pill);
+    scrollBottom();
+  }
+  function pillHide() { if (pill) { pill.remove(); pill = null; } }
+  function startListening() {
+    var C = sr();
+    if (!C) { status("التعرف الصوتي مش متاح — استخدم Chrome أو Edge على ربط http/https"); return; }
+    if (rec) { try { rec.abort(); } catch (e) {} }
+    rec = new C();
+    rec.lang = "ar-EG";
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    listening = true;
+    micBtn.classList.add("on");
+    status("بيسمعك دلوقتي — اتكلم طبيعي...");
+    pillShow("إنتا بتتكلم — كمل عادي");
+    rec.onresult = function (ev) {
+      var interim = "";
+      var finalTxt = "";
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) finalTxt += r[0].transcript; else interim += r[0].transcript;
+      }
+      inp.value = (finalTxt || interim).trim();
+      status("بيسمعك دلوقتي — اتكلم طبيعي...");
+    };
+    rec.onend = function () {
+      micBtn.classList.remove("on");
+      pillHide();
+      var was = listening;
+      listening = false;
+      if (was) { var val = (inp.value || "").trim(); if (val && !valTook(val)) handle(val); }
+      if (statusLine.innerHTML.indexOf("بيسمعك") !== -1) status(defOnline);
+    };
+    rec.onerror = function (ev) {
+      micBtn.classList.remove("on");
+      pillHide();
+      listening = false;
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+        status("محتاج إذن المايك — اضغط أيقونة المايك جنب الرابط واسمح");
+      } else if (ev.error === "no-speech") {
+        status("مسمعتش صوت — اضغط المايك تاني واتكلم أعلى");
+      } else if (ev.error === "audio-capture") {
+        status("مفيش مايك متصل أو مقفول من ويندوز — افتحه واضغط المايك تاني");
+      } else if (ev.error === "network") {
+        status("مشاكل إنترنت — التعرف الصوتي محتاج اتصال");
+      } else if (ev.error === "aborted") {
+        status(defOnline);
+      } else {
+        status("مشكلة في التعرف (" + ev.error + ")");
+      }
+    };
+    try { rec.start(); } catch (e) { status("فشل بدء المايك: " + e.message); }
+  }
+  var lastVocal = "";
+  function valTook(v) { if (v === lastVocal) return true; lastVocal = v; return false; }
+  function stopListening() {
+    if (!listening) return;
+    listening = false;
+    micBtn.classList.remove("on");
+    pillHide();
+    status(defOnline);
+    try { rec.stop(); rec = null; } catch (e) {}
+  }
+  sendBtn.addEventListener("click", function () { handle(inp.value); });
+  inp.addEventListener("keydown", function (e) { if (e.key === "Enter") handle(inp.value); });
+  micBtn.addEventListener("click", function () {
+    if (!sr()) { status("التعرف الصوتي مش متاح هنا — جرّب متصفح Chrome"); return; }
+    if (listening) { stopListening(); } else { startListening(); }
+  });
+  speakBtn.addEventListener("click", function () {
+    voiceOn = !voiceOn;
+    speakBtn.classList.toggle("on", voiceOn);
+    speakBtn.setAttribute("aria-label", voiceOn ? "كتم الرد الصوتي" : "فعّل الرد الصوتي");
+    status(voiceOn ? "الرد الصوتي شغال — البوت هيرد عليك بصوت" : "الرد الصوتي مكتوم — ردود نصية بس");
+    if (!voiceOn) stopVoice();
+  });
+  clearBtn.addEventListener("click", function () {
+    stopVoice();
+    CONV = [];
+    area.innerHTML = "";
+    botBubble(R.greeting);
+    renderChips();
+    status(defOnline);
+  });
+  voiceSel.addEventListener("change", function () {
+    voiceOn = true;
+    speakBtn.classList.add("on");
+    status("جارِ تشغيل عيّنة بهذا الصوت...");
+    stopVoice();
+    var sample = "أهلاً بيك في مودرن جاز! أنا مساعد مودرن جاز الذكي.";
+    if (this.value === "google") {
+      speak(sample);
+      return;
+    }
+    /* الصوت الطبيعي بيتولّد في الخلفية أول مرة (بياخد شوية) */
+    setTimeout(function () { speak(sample); }, 250);
+  });
+  area.innerHTML = "";
+  botBubble(R.greeting);
+  renderChips();
+  stopLips();
+  inp.focus();
+  /* تسخين صوت الترحيب في الكاش — عشان أول رد بصوت فوري.
+     نقسّمه جمل لأن Edge بطيء على النص الطويل. */
+  if (window.location.protocol !== "file:") {
+    setTimeout(function () {
+      try {
+        var parts = ttsChunks(cleanForTTS(R.greeting).slice(0, 900), 150);
+        for (var i = 0; i < parts.length; i++) {
+          fetch("/api/speak?text=" + encodeURIComponent(parts[i]) + "&voice=Charon").catch(function () {});
+        }
+      } catch (e) {}
+    }, 1200);
+  }
+})();
+</script>
+</body>
+</html>
