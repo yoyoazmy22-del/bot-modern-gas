@@ -229,11 +229,11 @@ function buildPrompt() {
   return `أنت مساعد «مودرن جاز» الذكي — المساعد الذكي لشركة مودرن جاز الحديثة للغاز الطبيعي.
 أجب بالعامية المصرية بلطف واحترافية، وكن مختصراً (3-6 سطور).
 
-قاعدة beginnings (مهمة جداً للصوت): ابدأ ردك بجملة ترحيب واحدة من هذه القوائم بالضبط، بالحروف دي، وبعدها مباشرة إجابتك:
-"أهلاً بيك في مودرن جاز!" أو "أهلاً بحضرتك!" أو "أهلاً بيك يا فندم!" أو "أهلاً وسهلاً بيك في مودرن جاز!" أو "أهلاً بك في مودرن جاز."
-ممنوع أي ترحيب تاني. ممنوع تكرر ترحيب لو الرد فيه اقتباس أو طلب تكرار.
+قاعدة الفهم (مهمة جداً): لو السؤال اتكتب بصياغة مختلفة، أو بكلمات قريبة/مرادفة، أو بغلط إملائي بسيط، أو بالعكس (سلب/استفهام/ترتيب كلمات مختلف)، فهم المقصود من سياق الكلمات الموجودة وردّ على المعلومة الصح من البيانات دي. متردّش "مش فاهم" ولا تطلب إعادة الصياغة لو المعنى واضح من الكلمات.
 
 مهمتك الإجابة عن خدمات الشركة وإرشاداتها بالاعتماد الحصري على المعلومات الموجودة تحتيك. لو حد سأل حاجة مش موجودة في المعلومات دي أو محتاج تفصيل شخصي، قوله إن حد من فريق خدمة العملاء هيتواصل معاه.
+
+رد نصي فقط — من غير أي صوت أو كلام عن النطق أو المايك.
 
 معلومات الشركة:
 
@@ -266,6 +266,7 @@ function normalizeAr(s) {
     .replace(/\u0629/g, "\u0647")                        // ة -> ه
     .replace(/\u0649/g, "\u064A")                        // ى -> ي
     .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[؟?،؛!.,]/g, " ")
     .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
     .replace(/\s+/g, " ")
     .toLowerCase()
@@ -273,15 +274,134 @@ function normalizeAr(s) {
 }
 
 const STOP = new Set([
-  "في", "من", "علي", "الى", "عن", "مع", "هذا", "هذه", "ذلك", "التي", "الذي",
-  "ما", "هو", "هي", "انا", "انت", "ايه", "ازاي", "امتي", "او", "و", "يا",
-  "the", "of", "and", "is", "a", "to", "in", "for", "on",
+  "في", "من", "علي", "على", "الى", "إلى", "عن", "مع", "هذا", "هذه", "ذلك", "التي", "الذي",
+  "ما", "هو", "هي", "انا", "أنا", "انت", "إنت", "ايه", "إيه", "ازاي", "إزاي", "امتي", "إمتي", "مين", "لمين",
+  "بيتم", "بتتم", "اتعمل", "اعمل", "اعرف", "عرف", "عايز", "عاوز", "ابغى", "اريد", "ممكن", "قوللي", "قولي",
+  "او", "أو", "و", "يا", "لو", "كل", "خدمه", "the", "of", "and", "is", "a", "to", "in", "for", "on", "what", "how", "when", "who",
 ]);
 
 function tokenize(s) {
   return normalizeAr(s)
     .split(" ")
     .filter((w) => w.length >= 2 && !STOP.has(w));
+}
+
+/* ── فهم إعادة الصياغة: تصريف/مرادفات/مطابقة تقريبية ──
+   الهدف: لو السؤال اتسأل بكلام مختلف بس نفس المعنى، نلاقي المقطع الصح.
+   بنعمل 3 مستويات: (1) الكلمة كما هي (2) تجريد السوابق/اللواحق
+   (3) مرادفات مجموعة (4) مسافة تحرير صغيرة للغلط الإملائي. */
+const SYNONYM_GROUPS = [
+  ["تعاقد", "اشتراك", "اشترك", "اتعاقد", "تعاقدت", "تسجيل", "سجل", "طلب", "تركيب", "ركب", "وصل", "توصيل", "انضمام", "عميل", "مشترك"],
+  ["بيت", "منزل", "شقة", "مسكن", "محل", "سكني", "منزلي"],
+  ["عداد", "كارت", "شحن", "شحنته", "رصيد", "قراءة", "استهلاك"],
+  ["دفع", "سداد", "فاتورة", "مستحق", "فوري", "فودافون", "انستاباي", "بوابة"],
+  ["طوارئ", "تسريب", "ريحة", "غاز", "محبس", "شبابيك", "129", "حريق", "نار", "لهب"],
+  ["فني", "زيارة", "صيانة", "عطل", "ورشة", "مهندس"],
+  ["مقر", "عنوان", "فرع", "مكان", "موقع", "مكتب"],
+  ["رقم", "تليفون", "هاتف", "تواصل", "اتصال", "خط", "ساخن", "جوال"],
+  ["مواعيد", "ساعات", "دوام", "مفتوح", "شغل", "يعمل", "عطلة"],
+  ["شركة", "مودرن", "جاز", "غاز", "حديثة", "الطبيعي"],
+  ["رؤية", "رسالة", "هدف", "قيم", "استراتيجية", "مهمة"],
+  ["مساهم", "مساهمين", "ملكية", "اسهم", "رأس", "مال"],
+  ["منطقة", "محافظة", "تغطية", "امتياز", "نطاق"],
+  ["سعر", "تكلفة", "رسوم", "مبلغ", "كم", "بيتكلف"],
+  ["وظيفة", "وظائف", "توظيف", "عمل", "متقدم", "cv"],
+];
+const SYNONYM_MAP = new Map();
+for (const group of SYNONYM_GROUPS) {
+  const norm = group.map(normalizeAr);
+  for (const w of norm) SYNONYM_MAP.set(w, norm);
+}
+
+const PREFIXES = ["وال", "بال", "لل", "كال", "فال", "ال", "و", "ب", "ل", "ك", "ف"];
+const SUFFIXES = ["ون", "ين", "ات", "ها", "هم", "كم", "نا", "ه", "ة", "ي", "ك", "ب"];
+function stemVariants(w) {
+  const n = normalizeAr(w);
+  if (!n) return [];
+  const out = new Set([n]);
+  for (const p of PREFIXES) {
+    if (n.length > p.length + 2 && n.startsWith(p)) out.add(n.slice(p.length));
+  }
+  for (const s of SUFFIXES) {
+    if (n.length > s.length + 2 && n.endsWith(s)) out.add(n.slice(0, -s.length));
+  }
+  for (const v of Array.from(out)) {
+    for (const p of PREFIXES) {
+      if (v.length > p.length + 2 && v.startsWith(p)) out.add(v.slice(p.length));
+    }
+    for (const s of SUFFIXES) {
+      if (v.length > s.length + 2 && v.endsWith(s)) out.add(v.slice(0, -s.length));
+    }
+  }
+  return Array.from(out);
+}
+
+/* Levenshtein محدود بـ max — كافي للغلط الإملائي البسيط */
+function editDistance(a, b, max) {
+  if (a === b) return 0;
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = new Array(b.length + 1);
+  let cur = new Array(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    cur[0] = i;
+    let rowMin = cur[0];
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+      if (cur[j] < rowMin) rowMin = cur[j];
+    }
+    if (rowMin > max) return max + 1;
+    const t = prev; prev = cur; cur = t;
+  }
+  return prev[b.length];
+}
+
+/* وزن مطابقة كلمة سؤال مقابل مفردات المستند: 1 = مطابقة تامة،
+   0 = مفيش علاقة. القيم بينهم بتسمح بترتيب النتائج بدون ما نرفض إجابة صح. */
+function termMatchWeight(term, docSet) {
+  if (!term) return 0;
+  if (docSet.has(term)) return 1;
+  const vs = stemVariants(term);
+  for (const v of vs) if (docSet.has(v)) return 0.9;
+
+  const syn = SYNONYM_MAP.get(term) || [];
+  for (const s of syn) {
+    if (docSet.has(s)) return 0.82;
+    for (const v of stemVariants(s)) if (docSet.has(v)) return 0.78;
+  }
+  for (const v of vs) {
+    const s2 = SYNONYM_MAP.get(v) || [];
+    for (const s of s2) {
+      if (docSet.has(s)) return 0.78;
+      for (const sv of stemVariants(s)) if (docSet.has(sv)) return 0.75;
+    }
+  }
+
+  let best = 0;
+  for (const dw of docSet) {
+    if (dw.length < 4 || term.length < 4) continue;
+    if (Math.abs(dw.length - term.length) > 2) continue;
+    const d = editDistance(term, dw, 2);
+    if (d === 1) best = Math.max(best, Math.min(term.length, dw.length) >= 5 ? 0.6 : 0.5);
+    else if (d === 2 && Math.min(term.length, dw.length) >= 6) best = Math.max(best, 0.42);
+  }
+  return best;
+}
+
+function docTokenSet(text) {
+  const set = new Set();
+  for (const w of tokenize(text)) {
+    set.add(w);
+    for (const v of stemVariants(w)) set.add(v);
+  }
+  return set;
+}
+
+function countOccurrences(haystack, needle) {
+  let n = 0, idx = haystack.indexOf(needle);
+  while (idx !== -1 && n < 5) { n++; idx = haystack.indexOf(needle, idx + needle.length); }
+  return n;
 }
 
 /* كلمات مفتاحية يدوية تعزّز الدقة مع أسئلة العملاء الشائعة */
@@ -312,7 +432,11 @@ function expand(q) {
       }
     }
   }
-  return out;
+  /* مرادفات الكلمات الموجودة فعلاً في السؤال */
+  for (const w of Array.from(out)) {
+    for (const s of (SYNONYM_MAP.get(w) || [])) out.push(s);
+  }
+  return Array.from(new Set(out));
 }
 
 /* تكرار الكلمات في كل المستندات — للترجيح IDF */
@@ -330,37 +454,45 @@ function idf(w) {
   return Math.log(1 + DOCS.length / (1 + n));
 }
 
-/* استرجاع أهم المقاطع لسؤال معيّن */
+/* استرجاع أهم المقاطع لسؤال معيّن — بيفهم إعادة الصياغة والمرادفات
+   والغلط الإملائي البسيط بدل ما يعتمد على تكرار الكلمات الحرفية. */
 function retrieve(query, topN) {
   topN = topN || 5;
   if (!DOCS.length) return [];
-  const terms = Array.from(new Set(expand(query)));
-  if (!terms.length) return [];
+  const core = Array.from(new Set(tokenize(query)));
+  if (!core.length) return [];
+  const extra = Array.from(new Set(expand(query))).filter((t) => !core.includes(t));
   const norms = DOCS.map((c) => normalizeAr(c.t));
+  const sets = DOCS.map((c) => docTokenSet(c.t));
+  const nq = normalizeAr(query);
   const scored = [];
   for (let i = 0; i < DOCS.length; i++) {
-    const cn = norms[i];
+    const cn = norms[i], ds = sets[i];
     let score = 0, hits = 0;
-    for (const t of terms) {
-      const w = idf(t);
-      if (cn.indexOf(t) === -1) continue;
+    for (const t of core) {
+      const m = termMatchWeight(t, ds);
+      if (!m) continue;
       hits++;
-      let cnt = 0, idx = cn.indexOf(t);
-      while (idx !== -1 && cnt < 5) { cnt++; idx = cn.indexOf(t, idx + t.length); }
-      score += w * (1 + Math.log(cnt));
+      score += idf(t) * m * (1 + Math.log(1 + countOccurrences(cn, t)));
+    }
+    /* كلمات إضافية من المرادفات/BOOST — وزن أقل عشان ما تطغاش */
+    for (const t of extra) {
+      const m = termMatchWeight(t, ds);
+      if (m) score += 0.35 * m * idf(t);
     }
     if (!hits) continue;
-    /* تغطية: كم نسبة من كلمات السؤال اتقابلت */
-    const cover = hits / terms.length;
-    if (cover < 0.4) continue;
-    scored.push({ s: score * (0.5 + cover), c: DOCS[i] });
+    const cover = hits / core.length;
+    /* جملة كاملة متطابقة = إشارة قوية جداً حتى لو الكلمات متفرقة */
+    const phrase = nq.length >= 8 && cn.indexOf(nq) !== -1 ? 1.45 : 1;
+    if (cover < 0.35 && phrase === 1) continue;
+    scored.push({ s: score * (0.4 + cover) * phrase, c: DOCS[i] });
   }
   if (!scored.length) return [];
   scored.sort((a, b) => b.s - a.s);
   /* محافظ: نسيب المقاطع الضعيفة عشان ما نلوّثش الإجابة */
   const best = scored[0].s;
   return scored
-    .filter((x) => x.s >= Math.max(6, best * 0.55))
+    .filter((x) => x.s >= Math.max(4, best * 0.5))
     .slice(0, topN)
     .map((x) => x.c);
 }
@@ -372,4 +504,8 @@ function buildRetrieved(query) {
   return "مرجع إضافي من الكوربريت:\n\n" + lines.join("\n\n---\n\n");
 }
 
-module.exports = { KG, CS, buildPrompt, retrieve, buildRetrieved, tokenize, normalizeAr };
+module.exports = {
+  KG, CS, buildPrompt, retrieve, buildRetrieved,
+  tokenize, normalizeAr, expand, stemVariants, editDistance,
+  termMatchWeight, docTokenSet, countOccurrences, SYNONYM_MAP,
+};
